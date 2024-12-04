@@ -18,6 +18,10 @@ main_loop:
 		je koniec
 	cmp AH, 2Eh
 		je change_color
+	cmp AH, 4Eh
+		je inc_brush_size
+	cmp AH, 4Ah
+		je dec_brush_size
 jmp main_loop
 
 koniec:
@@ -32,20 +36,25 @@ koniec:
 draw_pixel:
 	mov AH, 0Ch		;
 	mov AL, [color]		;Wydruk piksela na poz. myszy
+	mov byte [sizex], 0h
+	dec CX
 	
-	dec CX
-	int 10h
-	dec DX
-	int 10h
-	dec CX
-	int 10h
-	inc CX
-	dec DX
-	int 10h
-	inc DX
-	inc CX
-	int 10h
-	jmp main_loop
+	outer_loop:
+	mov BL, 0h
+		inner_loop:
+			int 10h
+			dec CX
+			inc BL
+			cmp BL, [brush_size]
+		jl inner_loop
+		dec DX
+		add CX, [brush_size]
+		inc byte [sizex]
+		mov BL, [sizex]
+		cmp BL, [brush_size]
+	jl outer_loop
+	
+jmp main_loop
 
 change_color:
 	mov AH, 00h
@@ -53,5 +62,18 @@ change_color:
 	inc byte [color]
 	jmp main_loop
 
+inc_brush_size:
+	mov AH, 00h
+	int 16h
+	inc word [brush_size]
+	jmp main_loop
+	
+dec_brush_size:
+	mov AH, 00h
+	int 16h
+	dec word [brush_size]
+	jmp main_loop
 
 color db 00h
+brush_size dw 3h
+sizex db 0h
