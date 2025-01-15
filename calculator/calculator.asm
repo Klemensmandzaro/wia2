@@ -70,21 +70,43 @@ JE dzielenie
 	
 dodawanie:
 	add AX, BX
-	jmp koniec
+	jmp wynik
 	
 odejmowanie:
 	sub AX, BX
-	jmp koniec
+	jmp wynik
 	
 mnozenie2:
 	mul BX
-	jmp koniec
+	jmp wynik
 	
 dzielenie: 
 	div BX
-	jmp koniec
+	jmp wynik
 
-;mov liczba, BX
+
+wynik:
+	cmp AX, 0
+JE odczyt
+	xor DX, DX
+	mov BX, 10
+	div BX
+	add DX, 0x30
+	mov BP, wynikek
+	add BP, word [licznik3]
+	add word [licznik3], 1
+	mov [BP], DL
+	jmp wynik
+	
+odczyt:
+	mov CX, word [licznik3]
+	mov AH, 02h
+	petla3:
+	mov DL, [BP]
+	int 21h
+	dec BP
+	loop petla3
+
 koniec:
 	mov AH, 00h
 	int 21h
@@ -92,6 +114,8 @@ koniec:
 licznik2 dw 1
 licznik dw 1
 ktoraliczba dw 1
-liczba db "9570"
+liczba db "2137"
 znak db "+"
-liczba2 db "5432"
+liczba2 db "0002"
+licznik3 dw 0
+wynikek dw 0
